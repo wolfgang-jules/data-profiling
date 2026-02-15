@@ -1,0 +1,108 @@
+connectors:
+  default: csv
+
+  groups:
+    file:
+      id: file
+      label: file
+      order: 1
+      connectors: [csv, json]
+    databases:
+      id: databases
+      label: databases (transactional)
+      order: 2
+      connectors: [postgres, mysql, mariadb, sqlserver, oracle, mongodb]
+    cloud_warehouses:
+      id: cloud_warehouses
+      label: cloud_warehouses
+      order: 3
+      connectors: [gcp_bigquery, aws_redshift, azure_synapse, snowflake]
+
+  catalog:
+    csv:
+      type: file
+      format: csv
+      path: ./input_csv_files/diamonds_sample.csv
+      options: {}
+
+    json:
+      type: file
+      format: json
+      path: ./input_csv_files/sample.json
+      options: {}
+
+    postgres:
+      type: sql
+      driver: postgresql
+      connection_string: postgresql+psycopg2://<user>:<password>@<host>:5432/<database>
+      options: {}
+
+    mysql:
+      type: sql
+      driver: mysql
+      connection_string: mysql+pymysql://<user>:<password>@<host>:3306/<database>
+      options: {}
+
+    mariadb:
+      type: sql
+      driver: mariadb
+      connection_string: mariadb+pymysql://<user>:<password>@<host>:3306/<database>
+      options: {}
+
+    sqlserver:
+      type: sql
+      driver: mssql
+      connection_string: mssql+pyodbc://<user>:<password>@<host>:1433/<database>?driver=ODBC+Driver+18+for+SQL+Server
+      options: {}
+
+    oracle:
+      type: sql
+      driver: oracle
+      connection_string: oracle+oracledb://<user>:<password>@<host>:1521/?service_name=<service_name>
+      options: {}
+
+    mongodb:
+      type: nosql
+      driver: mongodb
+      connection_string: mongodb://<user>:<password>@<host>:27017/<database>
+      options: {}
+
+    gcp_bigquery:
+      type: warehouse
+      provider: gcp
+      service: bigquery
+      project_id: <gcp-project-id>
+      dataset: <dataset_name_optional>
+      credentials_path: /path/to/service-account.json
+      options:
+        location: US
+
+    aws_redshift:
+      type: warehouse
+      provider: aws
+      service: redshift
+      connection_string: postgresql+psycopg2://<user>:<password>@<cluster-endpoint>:5439/<database>
+      options: {}
+
+    azure_synapse:
+      type: warehouse
+      provider: azure
+      service: synapse
+      connection_string: mssql+pyodbc://<user>:<password>@<workspace>.sql.azuresynapse.net:1433/<database>?driver=ODBC+Driver+18+for+SQL+Server
+      options: {}
+
+    snowflake:
+      type: warehouse
+      provider: snowflake
+      service: snowflake
+      # Option 1 (recommended):
+      connection_string: snowflake://<user>:<password>@<account>/<database>/<schema>?warehouse=<warehouse>&role=<role>
+      # Option 2 (explicit params):
+      account: <account>
+      user: <user>
+      password: <password>
+      warehouse: <warehouse>
+      database: <database>
+      schema: <schema>
+      role: <role_optional>
+      options: {}

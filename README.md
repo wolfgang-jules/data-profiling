@@ -1,99 +1,121 @@
-# Data Profiling con DataPrep
+# Data Profiling con Registro de Conectores
 
-Proyecto para generar reportes de **EDA (Exploratory Data Analysis)** usando `dataprep.eda`, con fuente de datos configurable (CSV o BigQuery).
+Proyecto para generar reportes **EDA (Exploratory Data Analysis)** con `dataprep.eda` y una capa de conectores extensible con validacion de esquema, fabrica y metadatos para UI.
 
-## Descripcion
+## Que se implemento
 
-El script principal (`main.py`) hace lo siguiente:
+- Registro central (`ConnectorRegistry`) con taxonomia y orden deterministico.
+- Modelo `ConnectorSpec` con campos: `id`, `group`, `label`, `type`, `driver/provider/service`, `required_fields`, `optional_fields`.
+- Fabrica `create_connector(connector_id, config)`.
+- Interfaz comun por conector:
+  - `connect()`
+  - `read(query_or_path, **kwargs)`
+  - `test_connection()`
+- Esquema de configuracion con:
+  - `connectors.default`
+  - `connectors.catalog`
+  - `connectors.groups`
+- Metadatos de UI agrupados por orden con `get_grouped_connector_options()`.
 
-1. Lee datos desde una fuente configurable (`DATA_SOURCE`):
-   - `csv` (por defecto)
-   - `bigquery`
+## Taxonomia y orden
 
-2. Usa un unico nombre de archivo (`FILE_NAME`):
-   - Si `DATA_SOURCE=csv`: lee `input_csv_files/<FILE_NAME>`.
-   - Si `DATA_SOURCE=bigquery`: lee `input_sql_queries/<FILE_NAME>`.
-3. Ejecuta la consulta y construye el DataFrame.
-4. Genera un reporte EDA en HTML con DataPrep.
-5. Guarda el resultado en `ouput_eda_reports/`.
-6. Abre el reporte automaticamente en el navegador.
+1. `file`
+   - `csv` (CSV)
+   - `json` (JSON)
+2. `databases` (transactional)
+   - `postgres` (Postgres)
+   - `mysql` (MySQL)
+   - `mariadb` (MariaDB)
+   - `sqlserver` (SQL Server)
+   - `oracle` (Oracle)
+   - `mongodb` (MongoDB)
+3. `cloud_warehouses`
+   - `gcp_bigquery` (GCP BigQuery)
+   - `aws_redshift` (AWS Redshift)
+   - `azure_synapse` (Azure Synapse)
+   - `snowflake` (Snowflake)
 
-## Estructura del proyecto
+## Estructura
 
 ```text
 .
 |-- main.py
-|-- input_csv_files/
-|   `-- diamonds_sample.csv
-|-- input_sql_queries/
-|   `-- table_name.sql
-`-- ouput_eda_reports/
-    `-- diamonds_sample.html
+|-- data_profiling/
+|   |-- __init__.py
+|   `-- connectors.py
+|-- config_examples/
+|   `-- connectors.example.yaml
+|-- docs/
+|   `-- config-schema.md
+`-- tests/
+    |-- test_connector_registry.py
+    `-- test_connector_connections.py
 ```
 
-## Requisitos
-
-- Python 3.9+
-- Entorno virtual (recomendado)
-- Paquetes:
-  - `pandas`
-  - `dataprep`
-  - `google-cloud-bigquery`
-  - `db-dtypes`
-
-## Instalacion
-
-En PowerShell:
+## Uso rapido
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install pandas dataprep
-pip install google-cloud-bigquery db-dtypes
+pip install -r requirements.txt
 ```
 
-## Uso
-
-Configura variables en el archivo `.env` (recomendado):
-
-```dotenv
-DATA_SOURCE=csv|bigquery
-FILE_NAME=diamonds_sample.csv
-GCP_PROJECT_ID=tu-proyecto-gcp
-GCP_LOCATION=US
-```
-
-Opcionalmente, tambien puedes configurarlas en PowerShell:
+Para pruebas:
 
 ```powershell
-$env:DATA_SOURCE = "csv|bigquery"
-$env:FILE_NAME = "diamonds_sample.csv"  # o "table_name.sql" para BigQuery
-$env:GCP_PROJECT_ID = "tu-proyecto-gcp"
-$env:GCP_LOCATION = "US"        # Opcional
+pip install .[test]
+pytest
 ```
 
-Luego ejecuta:
+Ejecucion principal:
 
 ```powershell
 python main.py
 ```
 
-## Salida
+Variables de entorno soportadas por `main.py`:
 
-- Reporte HTML generado en:
-
-```text
-ouput_eda_reports/<nombre_de_archivo_sin_extension>.html
+```dotenv
+DATA_SOURCE=csv|json|gcp_bigquery|bigquery
+FILE_NAME=diamonds_sample.csv
+GCP_PROJECT_ID=tu-proyecto-gcp
+GCP_DATASET=dataset_opcional
+GCP_CREDENTIALS_PATH=/ruta/a/service-account.json
+GCP_LOCATION=US
 ```
 
-## Ejemplo rapido
+## Esquema de configuracion
 
-Con la configuracion por defecto para CSV y el archivo `input_csv_files/diamonds_sample.csv`, la ejecucion genera:
+Config minima:
 
-- `ouput_eda_reports/diamonds_sample.html`
+```yaml
+connectors:
+  default: csv
+  catalog: {}
+  groups: {}
+```
 
-## Elegir fuente de datos
+Ejemplo completo:
 
-- `DATA_SOURCE=csv`: usa `FILE_NAME` con extension `.csv`.
-- `DATA_SOURCE=bigquery`: usa `FILE_NAME` con extension `.sql`.
-- El titulo y nombre del reporte se construyen con el nombre sin extension.
+- `config_examples/connectors.example.yaml`
+
+Referencia corta:
+
+- `docs/config-schema.md`
+
+## Dependencias opcionales por conector
+
+Instala extras segun el conector que uses:
+
+- Postgres: `pip install .[postgres]`
+- MySQL: `pip install .[mysql]`
+- MariaDB: `pip install .[mariadb]`
+- SQL Server: `pip install .[sqlserver]`
+- Oracle: `pip install .[oracle]`
+- MongoDB: `pip install .[mongodb]`
+- BigQuery: `pip install .[bigquery]`
+- Redshift: `pip install .[redshift]`
+- Synapse: `pip install .[synapse]`
+- Snowflake: `pip install .[snowflake]`
+
+Los imports son lazy: si falta una dependencia, se lanza un error claro indicando el extra a instalar.

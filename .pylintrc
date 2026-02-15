@@ -1,0 +1,5 @@
+[MASTER]
+init-hook=import os,sys; sys.path.insert(0, os.getcwd())
+
+[FORMAT]
+max-line-length=100

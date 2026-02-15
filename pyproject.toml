@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-profiling"
+version = "0.1.0"
+description = "Data profiling with connector registry and configurable sources"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "dataprep==0.4.1",
+    "pandas==1.5.3",
+    "google-cloud-bigquery==3.40.1",
+    "db-dtypes==1.2.0",
+    "MarkupSafe==2.0.1",
+    "numpy==1.22.4",
+    "setuptools==80.9.0",
+    "scipy==1.7.3",
+    "matplotlib==3.6.3",
+    "contourpy==1.0.7",
+]
+
+[project.optional-dependencies]
+postgres = ["sqlalchemy>=2.0", "psycopg2-binary>=2.9"]
+mysql = ["sqlalchemy>=2.0", "pymysql>=1.1"]
+mariadb = ["sqlalchemy>=2.0", "pymysql>=1.1"]
+sqlserver = ["sqlalchemy>=2.0", "pyodbc>=5.0"]
+oracle = ["sqlalchemy>=2.0", "oracledb>=2.0"]
+mongodb = ["pymongo>=4.0"]
+bigquery = ["google-cloud-bigquery>=3.0", "db-dtypes>=1.0"]
+redshift = ["sqlalchemy>=2.0", "psycopg2-binary>=2.9"]
+synapse = ["sqlalchemy>=2.0", "pyodbc>=5.0"]
+snowflake = ["sqlalchemy>=2.0", "snowflake-connector-python>=3.0", "snowflake-sqlalchemy>=1.5"]
+test = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

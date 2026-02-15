@@ -1,13 +1,14 @@
-"""Generate DataPrep EDA reports from CSV files or BigQuery SQL files."""
+"""Generate DataPrep EDA reports from registered connectors."""
 
 import os
 import webbrowser
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
 from dataprep.eda.create_report import create_report
-from google.cloud import bigquery
+
+from data_profiling.connectors import create_connector
 
 BASE_DIR = Path(__file__).resolve().parent
 INPUT_CSV_DIR = BASE_DIR / "input_csv_files"
@@ -39,24 +40,38 @@ def get_env_var(name: str, default: Optional[str] = None, required: bool = False
     return value if value is not None else ""
 
 
-def get_input_file_path(source_type: str, file_name: str) -> Path:
-    """Return the input file path validating extension by source type."""
+def normalize_connector_id(source_type: str) -> str:
+    """Normalize source type aliases to stable connector ids."""
     source = source_type.lower().strip()
+    alias_mapping = {
+        "bigquery": "gcp_bigquery",
+    }
+    return alias_mapping.get(source, source)
+
+
+def get_input_file_path(connector_id: str, file_name: str) -> Path:
+    """Return the input file path validating extension by connector id."""
+    source = connector_id.lower().strip()
     file_path = Path(file_name)
     suffix = file_path.suffix.lower()
 
     if source == "csv":
         expected_suffix = ".csv"
         input_dir = INPUT_CSV_DIR
-    elif source == "bigquery":
+    elif source == "json":
+        expected_suffix = ".json"
+        input_dir = INPUT_CSV_DIR
+    elif source == "gcp_bigquery":
         expected_suffix = ".sql"
         input_dir = INPUT_SQL_DIR
     else:
-        raise ValueError(f"Unsupported source type: {source_type}. Use 'csv' or 'bigquery'.")
+        raise ValueError(
+            "Unsupported source type. Use one of: 'csv', 'json', 'gcp_bigquery' (or alias 'bigquery')."
+        )
 
     if suffix != expected_suffix:
         raise ValueError(
-            f"FILE_NAME must end with '{expected_suffix}' when DATA_SOURCE='{source}'. "
+            f"FILE_NAME must end with '{expected_suffix}' when DATA_SOURCE='{connector_id}'. "
             f"Received: {file_name}"
         )
 
@@ -67,31 +82,52 @@ def get_input_file_path(source_type: str, file_name: str) -> Path:
     return resolved_file_path
 
 
-def load_dataframe_from_csv(csv_path: Path) -> pd.DataFrame:
-    """Load a dataframe from a CSV file path."""
-    return pd.read_csv(csv_path)
+def build_connector_config(connector_id: str, file_name: str) -> dict[str, Any]:
+    """Build connector-specific configuration from environment variables."""
+    if connector_id == "csv":
+        return {
+            "type": "file",
+            "format": "csv",
+            "path": str(get_input_file_path(connector_id=connector_id, file_name=file_name)),
+            "options": {},
+        }
+    if connector_id == "json":
+        return {
+            "type": "file",
+            "format": "json",
+            "path": str(get_input_file_path(connector_id=connector_id, file_name=file_name)),
+            "options": {},
+        }
+    if connector_id == "gcp_bigquery":
+        return {
+            "type": "warehouse",
+            "provider": "gcp",
+            "service": "bigquery",
+            "project_id": get_env_var("GCP_PROJECT_ID", required=True),
+            "dataset": get_env_var("GCP_DATASET", default=""),
+            "credentials_path": get_env_var("GCP_CREDENTIALS_PATH", default=""),
+            "options": {"location": get_env_var("GCP_LOCATION", default="") or None},
+        }
+
+    raise ValueError(f"Unsupported connector id: {connector_id}")
 
 
-def load_dataframe_from_bigquery(sql_path: Path) -> pd.DataFrame:
-    """Load a dataframe executing a SQL file in BigQuery."""
-    project_id = get_env_var("GCP_PROJECT_ID", required=True)
-    location = os.getenv("GCP_LOCATION")
-    query = sql_path.read_text(encoding="utf-8")
+def load_dataframe(connector_id: str, file_name: str) -> pd.DataFrame:
+    """Load a dataframe using the selected connector."""
+    normalized_id = normalize_connector_id(connector_id)
+    connector_config = build_connector_config(normalized_id, file_name)
+    connector = create_connector(normalized_id, connector_config)
 
-    client = bigquery.Client(project=project_id)
-    query_job = client.query(query=query, location=location)
-    return query_job.result().to_dataframe()
+    if normalized_id in {"csv", "json"}:
+        file_path = get_input_file_path(connector_id=normalized_id, file_name=file_name)
+        return connector.read(str(file_path))
 
+    if normalized_id == "gcp_bigquery":
+        sql_path = get_input_file_path(connector_id=normalized_id, file_name=file_name)
+        query = sql_path.read_text(encoding="utf-8")
+        return connector.read(query)
 
-def load_dataframe(source_type: str, file_name: str) -> pd.DataFrame:
-    """Select source loader based on source type."""
-    input_file_path = get_input_file_path(source_type=source_type, file_name=file_name)
-    source = source_type.lower().strip()
-    if source == "csv":
-        return load_dataframe_from_csv(input_file_path)
-    if source == "bigquery":
-        return load_dataframe_from_bigquery(input_file_path)
-    raise ValueError(f"Unsupported source type: {source_type}. Use 'csv' or 'bigquery'.")
+    raise ValueError(f"Unsupported connector id: {normalized_id}")
 
 
 def open_report(report_html_path: Path) -> None:
@@ -107,7 +143,7 @@ def main() -> None:
     file_name = get_env_var("FILE_NAME", default="diamonds_sample.csv")
     file_stem = Path(file_name).stem
 
-    df = load_dataframe(source_type=source_type, file_name=file_name)
+    df = load_dataframe(connector_id=source_type, file_name=file_name)
 
     OUTPUT_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     report_base_path = OUTPUT_REPORTS_DIR / file_stem
@@ -117,6 +153,7 @@ def main() -> None:
     report = create_report(df, title=title)
     report.save(str(report_base_path))
     open_report(report_html_path)
+
 
 if __name__ == "__main__":
     main()
