@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "dataprep==0.4.1",
+    "ydata-profiling==4.12.2",
     "pandas==1.5.3",
     "google-cloud-bigquery==3.40.1",
     "db-dtypes==1.2.0",

@@ -22,13 +22,13 @@ connectors:
     csv:
       type: file
       format: csv
-      path: ./input_csv_files/diamonds_sample.csv
+      path: "./input/csv_files/diamonds_sample.csv"
       options: {}
 
     json:
       type: file
       format: json
-      path: ./input_csv_files/sample.json
+      path: "./input/csv_files/sample.json"
       options: {}
 
     postgres:

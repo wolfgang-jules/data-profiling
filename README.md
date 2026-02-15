@@ -1,6 +1,8 @@
 # Data Profiling con Registro de Conectores
 
-Proyecto para generar reportes **EDA (Exploratory Data Analysis)** con `dataprep.eda` y una capa de conectores extensible con validacion de esquema, fabrica y metadatos para UI.
+Proyecto para generar reportes **EDA (Exploratory Data Analysis)** con `ydata-profiling` (entrypoint por defecto) y `dataprep.eda` (entrypoint alterno), mas una capa de conectores extensible con validacion de esquema, fabrica y metadatos para UI.
+
+![ydata profiling](images/ydata-profiling.gif)
 
 ## Que se implemento
 
@@ -40,6 +42,16 @@ Proyecto para generar reportes **EDA (Exploratory Data Analysis)** con `dataprep
 ```text
 .
 |-- main.py
+|-- main_ydata.py
+|-- main_dataprep.py
+|-- requirements_ydata.txt
+|-- requirements_dataprep.txt
+|-- input/
+|   |-- csv_files/
+|   `-- sql_files/
+|-- output/
+|   |-- dataprep/
+|   `-- ydata/
 |-- data_profiling/
 |   |-- __init__.py
 |   `-- connectors.py
@@ -52,25 +64,46 @@ Proyecto para generar reportes **EDA (Exploratory Data Analysis)** con `dataprep
     `-- test_connector_connections.py
 ```
 
-## Uso rapido
+## Entornos recomendados
+
+`ydata-profiling` (recomendado para `main.py` y `main_ydata.py`):
+Python recomendado: 3.10.11.
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+python -m venv .venv_ydata
+.\.venv_ydata\Scripts\Activate.ps1
+pip install -r requirements_ydata.txt
 ```
 
-Para pruebas:
+`dataprep` (para `main_dataprep.py`, stack mas legacy):
+Python recomendado: 3.9.13
+
+```powershell
+python -m venv .venv_dataprep
+.\.venv_dataprep\Scripts\Activate.ps1
+pip install -r requirements_dataprep.txt
+```
+
+Para pruebas en cualquiera de los entornos:
 
 ```powershell
 pip install .[test]
 pytest
 ```
 
-Ejecucion principal:
+Ejecucion principal (ydata-profiling):
 
 ```powershell
 python main.py
+```
+
+Seleccion de motor en `main.py`:
+- Edita la variable `ENGINE` al final del archivo con `ydata` o `dataprep`.
+
+Ejecucion con DataPrep:
+
+```powershell
+python main_dataprep.py
 ```
 
 Variables de entorno soportadas por `main.py`:
@@ -83,6 +116,13 @@ GCP_DATASET=dataset_opcional
 GCP_CREDENTIALS_PATH=/ruta/a/service-account.json
 GCP_LOCATION=US
 ```
+
+Rutas de IO:
+
+- `csv/json` leen desde `input/csv_files/<FILE_NAME>`.
+- `gcp-bigquery` lee el SQL desde `input/sql_files/<FILE_NAME>`.
+- `main_dataprep.py` escribe en `output/dataprep/<file_name>_profiling.html`.
+- `main_ydata.py` escribe en `output/ydata/<file_name>_profiling.html`.
 
 ## Esquema de configuracion
 
