@@ -18,14 +18,14 @@ connectors:
 ## IDs estables
 
 - File: `csv`, `json`
-- Databases: `postgres`, `mysql`, `mariadb`, `sqlserver`, `oracle`, `mongodb`
-- Cloud warehouses: `gcp_bigquery`, `aws_redshift`, `azure_synapse`, `snowflake`
+- Databases: `postgres`, `mysql`, `mariadb`, `sql-server`, `oracle`, `mongodb`
+- Cloud warehouses: `gcp-bigquery`, `aws-redshift`, `azure-synapse`, `snowflake`
 
 ## Orden fijo de grupos y conectores
 
 1. `file`: `csv`, `json`
-2. `databases`: `postgres`, `mysql`, `mariadb`, `sqlserver`, `oracle`, `mongodb`
-3. `cloud_warehouses`: `gcp_bigquery`, `aws_redshift`, `azure_synapse`, `snowflake`
+2. `databases`: `postgres`, `mysql`, `mariadb`, `sql-server`, `oracle`, `mongodb`
+3. `cloud_warehouses`: `gcp-bigquery`, `aws-redshift`, `azure-synapse`, `snowflake`
 
 ## API principal
 

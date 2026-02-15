@@ -398,7 +398,7 @@ class ConnectorRegistry:
                 help_text="Connect to MariaDB using a SQLAlchemy connection string.",
             ),
             ConnectorSpec(
-                id="sqlserver",
+                id="sql-server",
                 group="databases",
                 label="SQL Server",
                 order=4,
@@ -431,7 +431,7 @@ class ConnectorRegistry:
                 help_text="Connect to MongoDB using a MongoDB URI.",
             ),
             ConnectorSpec(
-                id="gcp_bigquery",
+                id="gcp-bigquery",
                 group="cloud_warehouses",
                 label="GCP BigQuery",
                 order=1,
@@ -443,7 +443,7 @@ class ConnectorRegistry:
                 help_text="Run SQL in BigQuery using service account JSON or ADC.",
             ),
             ConnectorSpec(
-                id="aws_redshift",
+                id="aws-redshift",
                 group="cloud_warehouses",
                 label="AWS Redshift",
                 order=2,
@@ -455,7 +455,7 @@ class ConnectorRegistry:
                 help_text="Connect to Amazon Redshift with a SQLAlchemy connection string.",
             ),
             ConnectorSpec(
-                id="azure_synapse",
+                id="azure-synapse",
                 group="cloud_warehouses",
                 label="Azure Synapse",
                 order=3,
@@ -588,12 +588,12 @@ def create_connector(connector_id: str, config: Dict[str, Any]) -> BaseConnector
         "postgres": SQLConnector,
         "mysql": SQLConnector,
         "mariadb": SQLConnector,
-        "sqlserver": SQLConnector,
+        "sql-server": SQLConnector,
         "oracle": SQLConnector,
         "mongodb": MongoDBConnector,
-        "gcp_bigquery": BigQueryConnector,
-        "aws_redshift": SQLConnector,
-        "azure_synapse": SQLConnector,
+        "gcp-bigquery": BigQueryConnector,
+        "aws-redshift": SQLConnector,
+        "azure-synapse": SQLConnector,
         "snowflake": SnowflakeConnector,
     }
 

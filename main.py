@@ -41,12 +41,8 @@ def get_env_var(name: str, default: Optional[str] = None, required: bool = False
 
 
 def normalize_connector_id(source_type: str) -> str:
-    """Normalize source type aliases to stable connector ids."""
-    source = source_type.lower().strip()
-    alias_mapping = {
-        "bigquery": "gcp_bigquery",
-    }
-    return alias_mapping.get(source, source)
+    """Normalize source type text to stable connector ids."""
+    return source_type.lower().strip()
 
 
 def get_input_file_path(connector_id: str, file_name: str) -> Path:
@@ -61,12 +57,12 @@ def get_input_file_path(connector_id: str, file_name: str) -> Path:
     elif source == "json":
         expected_suffix = ".json"
         input_dir = INPUT_CSV_DIR
-    elif source == "gcp_bigquery":
+    elif source == "gcp-bigquery":
         expected_suffix = ".sql"
         input_dir = INPUT_SQL_DIR
     else:
         raise ValueError(
-            "Unsupported source type. Use one of: 'csv', 'json', 'gcp_bigquery' (or alias 'bigquery')."
+            "Unsupported source type. Use one of: 'csv', 'json', 'gcp-bigquery'."
         )
 
     if suffix != expected_suffix:
@@ -98,7 +94,7 @@ def build_connector_config(connector_id: str, file_name: str) -> dict[str, Any]:
             "path": str(get_input_file_path(connector_id=connector_id, file_name=file_name)),
             "options": {},
         }
-    if connector_id == "gcp_bigquery":
+    if connector_id == "gcp-bigquery":
         return {
             "type": "warehouse",
             "provider": "gcp",
@@ -122,7 +118,7 @@ def load_dataframe(connector_id: str, file_name: str) -> pd.DataFrame:
         file_path = get_input_file_path(connector_id=normalized_id, file_name=file_name)
         return connector.read(str(file_path))
 
-    if normalized_id == "gcp_bigquery":
+    if normalized_id == "gcp-bigquery":
         sql_path = get_input_file_path(connector_id=normalized_id, file_name=file_name)
         query = sql_path.read_text(encoding="utf-8")
         return connector.read(query)

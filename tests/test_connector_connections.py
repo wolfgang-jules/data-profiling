@@ -123,7 +123,7 @@ def test_bigquery_connector_test_connection(monkeypatch) -> None:
     )
 
     connector = create_connector(
-        "gcp_bigquery",
+        "gcp-bigquery",
         {
             "type": "warehouse",
             "provider": "gcp",

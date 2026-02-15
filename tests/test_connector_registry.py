@@ -16,8 +16,8 @@ from data_profiling.connectors import (
 EXPECTED_GROUPS = ["file", "databases", "cloud_warehouses"]
 EXPECTED_CONNECTORS = {
     "file": ["csv", "json"],
-    "databases": ["postgres", "mysql", "mariadb", "sqlserver", "oracle", "mongodb"],
-    "cloud_warehouses": ["gcp_bigquery", "aws_redshift", "azure_synapse", "snowflake"],
+    "databases": ["postgres", "mysql", "mariadb", "sql-server", "oracle", "mongodb"],
+    "cloud_warehouses": ["gcp-bigquery", "aws-redshift", "azure-synapse", "snowflake"],
 }
 
 
@@ -97,7 +97,7 @@ def test_factory_returns_expected_classes() -> None:
             },
         ),
         (
-            "gcp_bigquery",
+            "gcp-bigquery",
             {
                 "type": "warehouse",
                 "provider": "gcp",

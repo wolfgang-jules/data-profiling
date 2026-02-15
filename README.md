@@ -26,13 +26,13 @@ Proyecto para generar reportes **EDA (Exploratory Data Analysis)** con `dataprep
    - `postgres` (Postgres)
    - `mysql` (MySQL)
    - `mariadb` (MariaDB)
-   - `sqlserver` (SQL Server)
+   - `sql-server` (SQL Server)
    - `oracle` (Oracle)
    - `mongodb` (MongoDB)
 3. `cloud_warehouses`
-   - `gcp_bigquery` (GCP BigQuery)
-   - `aws_redshift` (AWS Redshift)
-   - `azure_synapse` (Azure Synapse)
+   - `gcp-bigquery` (GCP BigQuery)
+   - `aws-redshift` (AWS Redshift)
+   - `azure-synapse` (Azure Synapse)
    - `snowflake` (Snowflake)
 
 ## Estructura
@@ -76,7 +76,7 @@ python main.py
 Variables de entorno soportadas por `main.py`:
 
 ```dotenv
-DATA_SOURCE=csv|json|gcp_bigquery|bigquery
+DATA_SOURCE=csv|json|gcp-bigquery
 FILE_NAME=diamonds_sample.csv
 GCP_PROJECT_ID=tu-proyecto-gcp
 GCP_DATASET=dataset_opcional
