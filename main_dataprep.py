@@ -136,7 +136,7 @@ def main() -> None:
     load_env_file(BASE_DIR / ".env")
 
     source_type = get_env_var("DATA_SOURCE", default="csv")
-    file_name = get_env_var("FILE_NAME", default="diamonds_sample.csv")
+    file_name = get_env_var("FILE_NAME", default="costumers.csv")
     file_stem = Path(file_name).stem
 
     df = load_dataframe(connector_id=source_type, file_name=file_name)
